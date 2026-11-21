@@ -35,10 +35,10 @@ const uninstall = args.includes("--uninstall");
 // Each kind is installed into <dest>/<kind>/<SLUG>/, so ids become "<SLUG>/<name>".
 const KINDS = ["skills", "agents", "commands"];
 
-// Frontmatter keys that OpenCode does not use, per kind.
+// Claude Code frontmatter keys that OpenCode does not use or reads differently, per kind.
 const DROP = {
-  agents: new Set(["name", "tools"]),
-  commands: new Set(["argument-hint"]),
+  agents: new Set(["name", "tools", "model", "color"]),
+  commands: new Set(["argument-hint", "allowed-tools", "model", "disable-model-invocation"]),
 };
 
 // Frontmatter keys added when missing, per kind.
@@ -51,10 +51,15 @@ function convert(text, kind) {
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return text;
   const [, header, body] = match;
-  const lines = header.split(/\r?\n/).filter((line) => {
+  // Drop a key together with its continuation lines (indented or YAML list items).
+  const lines = [];
+  let dropping = false;
+  for (const line of header.split(/\r?\n/)) {
     const key = line.match(/^([A-Za-z0-9_-]+):/)?.[1];
-    return !key || !DROP[kind].has(key);
-  });
+    if (key) dropping = DROP[kind].has(key);
+    else if (!/^(\s|-\s)/.test(line)) dropping = false;
+    if (!dropping) lines.push(line);
+  }
   for (const [key, value] of ADD[kind]) {
     if (!lines.some((line) => line.startsWith(`${key}:`))) lines.push(`${key}: ${value}`);
   }

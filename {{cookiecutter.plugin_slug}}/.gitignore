@@ -1,0 +1,4 @@
+node_modules/
+.tmp-opencode/
+.DS_Store
+Thumbs.db
