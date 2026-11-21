@@ -1,71 +1,81 @@
-# Claude Code plugin cookiecutter
+# plugin-init
 
-Cookiecutter template that scaffolds a new Claude Code plugin.
+Cookiecutter template that scaffolds one agent plugin for **Claude Code**, **OpenAI Codex** and **OpenCode** from a single source.
 
 ## Usage
 
 With [uv](https://docs.astral.sh/uv/) (no install needed):
 
 ```bash
-uvx cookiecutter path/to/agents-crew
+uvx cookiecutter gh:<owner>/plugin-init
 ```
 
 Or with pip:
 
 ```bash
 pip install cookiecutter
-cookiecutter path/to/agents-crew
+cookiecutter gh:<owner>/plugin-init
 ```
 
 Non-interactive example:
 
 ```bash
-uvx cookiecutter path/to/agents-crew --no-input plugin_name="My Plugin" include_mcp=y
+uvx cookiecutter gh:<owner>/plugin-init --no-input plugin_name="My Plugin" target_codex=n include_mcp=y
 ```
+
+## How it works
+
+Components are written once, in Claude Code format:
+
+- **Skills** (`skills/<name>/SKILL.md`) use the shared SKILL.md format that all three tools read.
+- **Agents and commands** are read natively by Claude Code. For OpenCode, `scripts/install-opencode.mjs` copies them into OpenCode's folders and converts the frontmatter.
+- **Hooks** (`hooks/hooks.json`) and **MCP** (`.mcp.json`) use the same files for Claude Code and Codex.
+
+Each target adds only its own manifest:
+
+| Target      | Files                                                                    |
+|-------------|--------------------------------------------------------------------------|
+| Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`          |
+| Codex       | `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`          |
+| OpenCode    | `scripts/install-opencode.mjs`                                           |
+
+### Compatibility
+
+| Component | Claude Code | Codex | OpenCode            |
+|-----------|-------------|-------|---------------------|
+| Skills    | yes         | yes   | yes (via installer) |
+| Agents    | yes         | no    | yes (via installer) |
+| Commands  | yes         | no    | yes (via installer) |
+| Hooks     | yes         | yes   | no                  |
+| MCP       | yes         | yes   | no                  |
 
 ## Options
 
-| Variable              | Default            | Effect                                              |
-|-----------------------|--------------------|-----------------------------------------------------|
-| `plugin_name`         | My Claude Plugin   | Human-readable name                                 |
-| `plugin_slug`         | derived from name  | Plugin id, must be kebab-case                       |
-| `description`         | A Claude Code plugin. | Goes into `plugin.json` and README              |
-| `author_name`         | Your Name          | Author in `plugin.json`                             |
-| `author_email`        | (empty)            | Omitted from `plugin.json` when empty               |
-| `version`             | 0.1.0              | Plugin version                                      |
-| `license`             | MIT                | MIT, Apache-2.0 or Proprietary                      |
-| `include_agent`       | y                  | `agents/example-agent.md`                           |
-| `include_skill`       | y                  | `skills/example-skill/SKILL.md`                     |
-| `include_command`     | y                  | `commands/hello.md`                                 |
-| `include_hooks`       | n                  | `hooks/hooks.json`                                  |
-| `include_mcp`         | n                  | `.mcp.json` and `servers/`                          |
-| `include_marketplace` | y                  | `.claude-plugin/marketplace.json` (repo installable as a marketplace) |
+| Variable              | Default               | Effect                                          |
+|-----------------------|-----------------------|-------------------------------------------------|
+| `plugin_name`         | My Agent Plugin       | Human-readable name                             |
+| `plugin_slug`         | derived from name     | Plugin id, kebab-case, max 64 chars             |
+| `description`         | An agent plugin ...   | Manifests and README                            |
+| `author_name`         | Your Name             | Author in manifests                             |
+| `author_email`        | (empty)               | Omitted when empty                              |
+| `version`             | 0.1.0                 | Plugin version                                  |
+| `license`             | MIT                   | MIT, Apache-2.0 or Proprietary                  |
+| `target_claude`       | y                     | Claude Code manifest                            |
+| `target_codex`        | y                     | Codex manifest                                  |
+| `target_opencode`     | y                     | OpenCode installer                              |
+| `include_skill`       | y                     | `skills/example-skill/SKILL.md`                 |
+| `include_agent`       | y                     | `agents/example-agent.md`                       |
+| `include_command`     | y                     | `commands/hello.md`                             |
+| `include_hooks`       | n                     | `hooks/hooks.json`                              |
+| `include_mcp`         | n                     | `.mcp.json` and `servers/`                      |
+| `include_marketplace` | y                     | Marketplace files for each selected target      |
+| `codex_category`      | Coding                | `category` in the Codex manifest                |
 
-## Generated layout
-
-```
-<plugin_slug>/
-├── .claude-plugin/
-│   ├── plugin.json
-│   └── marketplace.json   # optional
-├── agents/                # optional
-├── skills/                # optional
-├── commands/              # optional
-├── hooks/hooks.json       # optional
-├── .mcp.json              # optional
-├── servers/               # optional, with .mcp.json
-└── README.md
-```
+At least one target must be selected. Components that no selected target can use are removed.
 
 ## Template internals
 
 - `cookiecutter.json`: variables and prompts.
-- `hooks/pre_gen_project.py`: rejects a slug that is not kebab-case.
-- `hooks/post_gen_project.py`: deletes the parts you answered `n` to.
-- `{{cookiecutter.plugin_slug}}/`: the plugin template itself.
-
-Test a generated plugin with:
-
-```bash
-claude --plugin-dir ./<plugin_slug>
-```
+- `hooks/pre_gen_project.py`: validates the slug and that a target is selected.
+- `hooks/post_gen_project.py`: removes unselected targets and components.
+- `{{cookiecutter.plugin_slug}}/`: the plugin template.

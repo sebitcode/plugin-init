@@ -1,0 +1,23 @@
+{
+  "name": "{{ cookiecutter.plugin_slug }}",
+  "version": "{{ cookiecutter.version }}",
+  "description": "{{ cookiecutter.description }}",
+  "author": {
+    "name": "{{ cookiecutter.author_name }}"{% if cookiecutter.author_email %},
+    "email": "{{ cookiecutter.author_email }}"{% endif %}
+  },
+  "license": "{{ cookiecutter.license }}",
+{%- if cookiecutter.include_skill == 'y' %}
+  "skills": "./skills/",
+{%- endif %}
+{%- if cookiecutter.include_mcp == 'y' %}
+  "mcpServers": "./.mcp.json",
+{%- endif %}
+  "interface": {
+    "displayName": "{{ cookiecutter.plugin_name }}",
+    "shortDescription": "{{ cookiecutter.description }}",
+    "longDescription": "{{ cookiecutter.description }}",
+    "developerName": "{{ cookiecutter.author_name }}",
+    "category": "{{ cookiecutter.codex_category }}"
+  }
+}

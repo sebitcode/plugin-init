@@ -1,6 +1,6 @@
 ---
 name: example-agent
-description: Example subagent for {{ cookiecutter.plugin_name }}. Replace this line with when Claude should delegate to this agent.
+description: Example subagent for {{ cookiecutter.plugin_name }}. Replace this line with when it should be used.
 tools: Read, Grep, Glob
 ---
 

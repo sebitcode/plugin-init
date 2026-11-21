@@ -1,0 +1,20 @@
+{
+  "name": "{{ cookiecutter.plugin_slug }}-marketplace",
+  "interface": {
+    "displayName": "{{ cookiecutter.plugin_name }}"
+  },
+  "plugins": [
+    {
+      "name": "{{ cookiecutter.plugin_slug }}",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "{{ cookiecutter.codex_category }}"
+    }
+  ]
+}
