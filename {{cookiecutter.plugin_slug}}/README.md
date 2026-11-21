@@ -40,6 +40,16 @@
 | Commands  | yes         | no    | yes (via installer) |
 | Hooks     | yes         | yes   | no (needs a JS plugin) |
 | MCP       | yes         | yes   | no (add it to `opencode.json`) |
+
+## Requirements
+
+- Node.js 18+ on `PATH`. Hooks, local MCP servers and the scripts in `scripts/` run with `node`.
+
+Check the plugin with:
+
+```bash
+node scripts/validate.mjs
+```
 {% if cookiecutter.target_claude == 'y' %}
 ## Claude Code
 

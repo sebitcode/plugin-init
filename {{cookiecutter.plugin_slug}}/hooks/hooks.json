@@ -5,7 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{{ cookiecutter.plugin_slug }} loaded'"
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session-start.mjs\"",
+            "timeout": 10
           }
         ]
       }

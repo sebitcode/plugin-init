@@ -34,5 +34,6 @@
     "include_mcp": "Include an example MCP server config (Claude Code, Codex)?",
     "include_marketplace": "Add marketplace files so the repo can be installed directly?",
     "codex_category": "Codex plugin category"
-  }
+  },
+  "_copy_without_render": ["scripts/validate.mjs"]
 }

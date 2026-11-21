@@ -43,8 +43,11 @@ the example components; do not keep them.
   - `${VAR}` and `$ARGUMENTS` are safe; Jinja ignores them.
   - Keep JSON valid in every combination of options. Watch commas around
     `{% if %}` blocks.
+- `{{cookiecutter.plugin_slug}}/scripts/validate.mjs` is copied without
+  rendering (`_copy_without_render`). Do not put Jinja in it.
 - When a platform's plugin format changes, update the generated
-  `AGENTS.md`, the manifests and the root `README.md` together.
+  `AGENTS.md`, `scripts/validate.mjs` (event lists, required fields), the
+  manifests and the root `README.md` together.
 
 ## Test before you commit
 
@@ -57,7 +60,7 @@ uvx cookiecutter . --no-input -o "$OUT" plugin_name="Full" include_hooks=y inclu
 uvx cookiecutter . --no-input -o "$OUT" plugin_name="Claude Only" target_codex=n target_opencode=n
 uvx cookiecutter . --no-input -o "$OUT" plugin_name="Codex Only" target_claude=n target_opencode=n
 uvx cookiecutter . --no-input -o "$OUT" plugin_name="OpenCode Only" target_claude=n target_codex=n
-find "$OUT" -name '*.json' -exec node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" {} \;
+for d in "$OUT"/*/; do node "$d/scripts/validate.mjs" || echo "FAILED: $d"; done
 cd "$OUT/full" && node scripts/install-opencode.mjs --dest ./.tmp-opencode
 ```
 

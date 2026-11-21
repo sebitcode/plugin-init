@@ -27,7 +27,9 @@ Plugin id (slug): `{{ cookiecutter.plugin_slug }}`
 ├── hooks/hooks.json                # Claude Code, Codex
 ├── .mcp.json                       # Claude Code, Codex
 ├── servers/                        # code for local MCP servers
-├── scripts/                        # helper scripts (OpenCode installer lives here)
+├── scripts/validate.mjs            # checks the plugin for every target
+├── scripts/hooks/                  # Node scripts that hooks.json runs
+├── scripts/install-opencode.mjs    # OpenCode installer
 ├── .claude-plugin/plugin.json      # Claude Code manifest
 ├── .claude-plugin/marketplace.json # Claude Code marketplace (also read by Codex desktop)
 ├── .codex-plugin/plugin.json       # Codex manifest
@@ -140,6 +142,7 @@ Rules:
 ## Hooks (Claude Code, Codex)
 
 Path: `hooks/hooks.json`. Both platforms read the same file and format.
+Hook logic lives in Node scripts under `scripts/hooks/`.
 
 ```json
 {
@@ -147,7 +150,11 @@ Path: `hooks/hooks.json`. Both platforms read the same file and format.
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/on-start.mjs\"" }
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session-start.mjs\"",
+            "timeout": 10
+          }
         ]
       }
     ]
@@ -155,13 +162,50 @@ Path: `hooks/hooks.json`. Both platforms read the same file and format.
 }
 ```
 
-Rules:
+### Events
 
-- Put hook logic in a script under `scripts/`, not inline shell. Users run
-  Windows, macOS and Linux; prefer `node` scripts over bash.
-- Quote `${CLAUDE_PLUGIN_ROOT}`: paths can contain spaces.
-- `SessionStart` is confirmed on both platforms. Check each platform's docs
-  before you use another event.
+Use only events that exist on every selected platform:
+
+| Event              | Claude Code | Codex |
+|--------------------|-------------|-------|
+| SessionStart       | yes         | yes   |
+| SessionEnd         | yes         | yes   |
+| UserPromptSubmit   | yes         | yes   |
+| PreToolUse         | yes         | yes   |
+| PostToolUse        | yes         | yes   |
+| PermissionRequest  | yes         | yes   |
+| Stop               | yes         | yes   |
+| SubagentStart      | yes         | yes   |
+| SubagentStop       | yes         | yes   |
+| PreCompact         | yes         | yes   |
+| Notification       | yes         | no    |
+| PreModelRequest, PostModelRequest, Interrupt | no | yes |
+
+### Input and output contract (same on both platforms)
+
+- The hook gets **one JSON object on stdin**. Common fields: `session_id`,
+  `cwd`, `hook_event_name`. Event fields: `source` (SessionStart), `prompt`
+  (UserPromptSubmit), `tool_name` and `tool_input` (PreToolUse/PostToolUse).
+- To add context for the model, print JSON on stdout:
+  `{"hookSpecificOutput": {"hookEventName": "<Event>", "additionalContext": "..."}}`.
+  This works for SessionStart, UserPromptSubmit and SubagentStart on both.
+- To block a tool in PreToolUse, print
+  `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "..."}}`.
+- Exit 0 with no output means success. Never print plain text from Stop or
+  SubagentStop hooks; Codex treats it as an error.
+- Tool names differ in matchers: shell is `Bash` on both, but file edits are
+  `Edit`/`Write` in Claude Code and `apply_patch` in Codex. Match both when you
+  filter edits.
+
+### Rules
+
+- Write hook scripts in Node (`.mjs`, no dependencies). Never use bash or
+  PowerShell scripts: Claude Code and Codex use different shells on Windows,
+  and Codex does not document which one.
+- Start every command with `node` and quote the path:
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/hooks/<name>.mjs"`.
+- Set `timeout` (seconds). Keep hooks fast; SessionStart runs on every session.
+- A hook must never crash the session: catch errors, exit 0 when unsure.
 - Codex runs plugin hooks only after the user trusts the plugin, and plugins
   with hooks cannot go in the public Codex directory. Hooks must never be
   required for the plugin to work.
@@ -236,22 +280,32 @@ OpenCode has no manifest for file-based components. The installer copies
   `DROP` table in the installer.
 - Do not add dependencies to the installer. It must run with plain `node`.
 {% endif %}
+## Requirements
+
+- Node.js 18+ on `PATH`. The validator, the OpenCode installer, the hooks and
+  local MCP servers all run with `node`. Tell users this in the README.
+- To test a target, its CLI must be installed: `claude`, `codex` or `opencode`.
+  The validator reports which ones are missing.
+
 ## Checklist for every change
 
 1. The component lives in its single source file, at the path above.
 2. Frontmatter uses only portable keys.
 3. Ids are kebab-case and match their file or folder name.
-4. Every JSON file parses.
-5. Every manifest still lists the right components, and versions match.
-6. The README component list and compatibility table are still true.
-7. Run the checks below.
+4. Every manifest still lists the right components, and versions match.
+5. The README component list and compatibility table are still true.
+6. `node scripts/validate.mjs` exits with 0 errors. Fix warnings unless you
+   have a reason to keep them.
 
 ## Checks
 
 ```bash
-# Every JSON file parses
-node -e "for (const f of process.argv.slice(1)) JSON.parse(require('fs').readFileSync(f,'utf8'))" $(git ls-files '*.json')
+# Validates JSON, manifests, versions, skills, agents, commands, hooks events,
+# referenced script paths and MCP config, and lists missing CLIs.
+node scripts/validate.mjs
 ```
+
+When you add a check rule to `AGENTS.md`, add it to `scripts/validate.mjs` too.
 {%- if cookiecutter.target_claude == 'y' %}
 
 ```bash

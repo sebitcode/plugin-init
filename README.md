@@ -73,6 +73,15 @@ Each target adds only its own manifest:
 
 At least one target must be selected. Components that no selected target can use are removed.
 
+## After generation
+
+The template checks your environment and runs the plugin's validator:
+
+- Reports whether Node.js and the CLI of each selected target (`claude`, `codex`, `opencode`) are on `PATH`, with the install command for each missing one.
+- Runs `node scripts/validate.mjs`, which checks manifests, versions, skills, agents, commands, hook events per platform, referenced script paths and MCP config.
+
+Every generated plugin includes an `AGENTS.md` with the rules for keeping it compatible with all three platforms.
+
 ## Template internals
 
 - `cookiecutter.json`: variables and prompts.
