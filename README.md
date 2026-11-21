@@ -7,20 +7,20 @@ Cookiecutter template that scaffolds one agent plugin for **Claude Code**, **Ope
 With [uv](https://docs.astral.sh/uv/) (no install needed):
 
 ```bash
-uvx cookiecutter gh:<owner>/plugin-init
+uvx cookiecutter gh:sebitcode/plugin-init
 ```
 
 Or with pip:
 
 ```bash
 pip install cookiecutter
-cookiecutter gh:<owner>/plugin-init
+cookiecutter gh:sebitcode/plugin-init
 ```
 
 Non-interactive example:
 
 ```bash
-uvx cookiecutter gh:<owner>/plugin-init --no-input plugin_name="My Plugin" target_codex=n include_mcp=y
+uvx cookiecutter gh:sebitcode/plugin-init --no-input plugin_name="My Plugin" target_codex=n include_mcp=y
 ```
 
 ## How it works
