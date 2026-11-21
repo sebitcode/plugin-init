@@ -49,23 +49,23 @@ the example components; do not keep them.
   `AGENTS.md`, `scripts/validate.mjs` (event lists, required fields), the
   manifests and the root `README.md` together.
 
+## Package manager
+
+This repo and every generated plugin use **pnpm** only. Never write `npm`,
+`npx` or `yarn` in scripts or docs; use `pnpm`, `pnpm dlx` and `pnpm add -g`.
+The generated `package.json` pins `packageManager`; update the pnpm version in
+both `package.json` files together.
+
+Cookiecutter itself is a Python tool, so generation runs with
+`uvx cookiecutter`.
+
 ## Test before you commit
 
-Generate the combinations below. Every run must succeed, every JSON file must
-parse, and only the expected files may exist.
-
 ```bash
-OUT=$(mktemp -d)
-uvx cookiecutter . --no-input -o "$OUT" plugin_name="Full" include_hooks=y include_mcp=y
-uvx cookiecutter . --no-input -o "$OUT" plugin_name="Claude Only" target_codex=n target_opencode=n
-uvx cookiecutter . --no-input -o "$OUT" plugin_name="Codex Only" target_claude=n target_opencode=n
-uvx cookiecutter . --no-input -o "$OUT" plugin_name="OpenCode Only" target_claude=n target_codex=n
-for d in "$OUT"/*/; do node "$d/scripts/validate.mjs" || echo "FAILED: $d"; done
-cd "$OUT/full" && node scripts/install-opencode.mjs --dest ./.tmp-opencode
+pnpm test
 ```
 
-This run must fail with an error:
-
-```bash
-uvx cookiecutter . --no-input -o "$OUT" target_claude=n target_codex=n target_opencode=n
-```
+`scripts/test-template.mjs` generates every option combination, checks which
+files exist, runs each plugin's validator and the OpenCode installer, and
+checks that a missing target and an invalid slug fail. Add a case there for
+every new option.

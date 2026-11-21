@@ -44,11 +44,12 @@
 ## Requirements
 
 - Node.js 18+ on `PATH`. Hooks, local MCP servers and the scripts in `scripts/` run with `node`.
+- [pnpm](https://pnpm.io) for scripts and dependencies. Do not use npm or yarn.
 
 Check the plugin with:
 
 ```bash
-node scripts/validate.mjs
+pnpm validate
 ```
 {% if cookiecutter.target_claude == 'y' %}
 ## Claude Code
@@ -83,12 +84,12 @@ Hooks in Codex run only after the user trusts the plugin.
 {%- if cookiecutter.target_opencode == 'y' %}
 ## OpenCode
 
-Requires Node.js. From a clone of this repo:
+From a clone of this repo:
 
 ```bash
-node scripts/install-opencode.mjs --dest /path/to/project/.opencode   # one project
-node scripts/install-opencode.mjs --global                            # all projects
-node scripts/install-opencode.mjs --global --uninstall                # remove
+pnpm opencode:install --dest /path/to/project/.opencode   # one project
+pnpm opencode:install --global                            # all projects
+pnpm opencode:uninstall --global                          # remove
 ```
 
 Items are namespaced under `{{ cookiecutter.plugin_slug }}/`, for example the command `/{{ cookiecutter.plugin_slug }}/hello`.

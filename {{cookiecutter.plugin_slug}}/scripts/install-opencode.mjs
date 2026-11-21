@@ -6,10 +6,10 @@
 // and converts agent/command frontmatter to OpenCode's fields.
 //
 // Usage:
-//   node scripts/install-opencode.mjs              # into ./.opencode of the current project
-//   node scripts/install-opencode.mjs --global     # into ~/.config/opencode
-//   node scripts/install-opencode.mjs --dest DIR   # into DIR
-//   node scripts/install-opencode.mjs --uninstall  # remove what was installed (combine with the above)
+//   pnpm opencode:install --global      # into ~/.config/opencode
+//   pnpm opencode:install --dest DIR    # into DIR (for example <project>/.opencode)
+//   pnpm opencode:uninstall --global    # remove what was installed (also accepts --dest)
+// With no option, it installs into ./.opencode of the current directory.
 
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";

@@ -1,0 +1,22 @@
+{
+  "name": "{{ cookiecutter.plugin_slug }}",
+  "version": "{{ cookiecutter.version }}",
+  "description": "{{ cookiecutter.description }}",
+  "license": "{{ cookiecutter.license }}",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+{%- if cookiecutter.target_opencode == 'y' %}
+    "opencode:install": "node scripts/install-opencode.mjs",
+    "opencode:uninstall": "node scripts/install-opencode.mjs --uninstall",
+{%- endif %}
+{%- if cookiecutter.include_hooks == 'y' and (cookiecutter.target_claude == 'y' or cookiecutter.target_codex == 'y') %}
+    "hooks:session-start": "node scripts/hooks/session-start.mjs",
+{%- endif %}
+    "validate": "node scripts/validate.mjs"
+  }
+}

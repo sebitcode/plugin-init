@@ -78,9 +78,18 @@ At least one target must be selected. Components that no selected target can use
 The template checks your environment and runs the plugin's validator:
 
 - Reports whether Node.js and the CLI of each selected target (`claude`, `codex`, `opencode`) are on `PATH`, with the install command for each missing one.
-- Runs `node scripts/validate.mjs`, which checks manifests, versions, skills, agents, commands, hook events per platform, referenced script paths and MCP config.
+- Reports whether pnpm is installed. Generated plugins use pnpm only (`package.json` with `packageManager`).
+- Runs `pnpm validate`, which checks manifests, versions, skills, agents, commands, hook events per platform, referenced script paths and MCP config.
 
 Every generated plugin includes an `AGENTS.md` with the rules for keeping it compatible with all three platforms.
+
+## Develop the template
+
+Requires [uv](https://docs.astral.sh/uv/) and pnpm. Run the full test matrix with:
+
+```bash
+pnpm test
+```
 
 ## Template internals
 

@@ -65,11 +65,19 @@ INSTALL = {
         if WINDOWS
         else "curl -fsSL https://claude.ai/install.sh | bash"
     ),
-    "codex": "npm install -g @openai/codex",
-    "opencode": "npm install -g opencode-ai",
+    "pnpm": (
+        "Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression"
+        if WINDOWS
+        else "curl -fsSL https://get.pnpm.io/install.sh | sh -"
+    ),
+    "codex": "pnpm add -g @openai/codex",
+    "opencode": "pnpm add -g opencode-ai",
 }
 
-needed = [("node", "Node.js (validator, OpenCode installer, hooks)", True)]
+needed = [
+    ("node", "Node.js 18+ (hooks, MCP servers, scripts)", True),
+    ("pnpm", "pnpm (package manager for this project)", True),
+]
 needed += [
     ("claude", "Claude Code CLI", claude),
     ("codex", "Codex CLI", codex),
@@ -90,13 +98,22 @@ if missing:
     print("\nInstall what is missing to test every target:")
     for cmd in missing:
         print(f"  {cmd}: {INSTALL[cmd]}")
+    if any(cmd in missing for cmd in ("codex", "opencode")):
+        print("  (run `pnpm setup` once before `pnpm add -g` if pnpm has no global bin dir)")
 
-if shutil.which("node"):
-    print("\nRunning node scripts/validate.mjs ...\n")
-    result = subprocess.run(["node", "scripts/validate.mjs"], cwd=ROOT)
-    if result.returncode != 0:
-        print("\nThe validator reported errors. Fix them before you publish.")
+pnpm = shutil.which("pnpm")
+node = shutil.which("node")
+if pnpm and node:
+    print("\nRunning pnpm validate ...\n")
+    result = subprocess.run([pnpm, "validate"], cwd=ROOT)
+elif node:
+    print("\npnpm not found; running node scripts/validate.mjs ...\n")
+    result = subprocess.run([node, "scripts/validate.mjs"], cwd=ROOT)
 else:
-    print("\nSkipped validation: Node.js not found. Run `node scripts/validate.mjs` after installing it.")
+    result = None
+    print("\nSkipped validation: Node.js not found. Run `pnpm validate` after installing it.")
+
+if result is not None and result.returncode != 0:
+    print("\nThe validator reported errors. Fix them before you publish.")
 
 print("\nNext: read AGENTS.md, then replace the example components.")

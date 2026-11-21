@@ -27,6 +27,7 @@ Plugin id (slug): `{{ cookiecutter.plugin_slug }}`
 ├── hooks/hooks.json                # Claude Code, Codex
 ├── .mcp.json                       # Claude Code, Codex
 ├── servers/                        # code for local MCP servers
+├── package.json                    # pnpm scripts: validate, opencode:install
 ├── scripts/validate.mjs            # checks the plugin for every target
 ├── scripts/hooks/                  # Node scripts that hooks.json runs
 ├── scripts/install-opencode.mjs    # OpenCode installer
@@ -279,30 +280,49 @@ OpenCode has no manifest for file-based components. The installer copies
 - When you add a frontmatter key that OpenCode does not accept, add it to the
   `DROP` table in the installer.
 - Do not add dependencies to the installer. It must run with plain `node`.
+- Run it with `pnpm opencode:install` / `pnpm opencode:uninstall`.
 {% endif %}
 ## Requirements
 
 - Node.js 18+ on `PATH`. The validator, the OpenCode installer, the hooks and
   local MCP servers all run with `node`. Tell users this in the README.
+- pnpm. It is the only package manager for this project.
 - To test a target, its CLI must be installed: `claude`, `codex` or `opencode`.
   The validator reports which ones are missing.
+
+## Package manager: pnpm only
+
+- Run project tasks through `package.json` scripts: `pnpm validate`,
+  `pnpm opencode:install`. Add a script for every new task.
+- Add dependencies with `pnpm add` (or `pnpm add -D`). Commit
+  `pnpm-lock.yaml`. Never commit `package-lock.json`, `yarn.lock` or
+  `bun.lock`; the validator fails on them.
+- Install global CLIs with `pnpm add -g <pkg>`; run one-off tools with
+  `pnpm dlx <pkg>`. Do not write `npm`, `npx` or `yarn` in docs or scripts.
+- Keep `version` in `package.json` equal to the manifests' version.
+- Hook and MCP commands in `hooks.json` and `.mcp.json` call `node` directly,
+  not `pnpm`: the platforms run them on every event, and pnpm adds startup
+  time and an extra dependency for users.
+- If an MCP server needs dependencies, give it its own `package.json` under
+  `servers/<name>/` and add it to a `pnpm-workspace.yaml`.
 
 ## Checklist for every change
 
 1. The component lives in its single source file, at the path above.
 2. Frontmatter uses only portable keys.
 3. Ids are kebab-case and match their file or folder name.
-4. Every manifest still lists the right components, and versions match.
+4. Every manifest and `package.json` still list the right components, and
+   versions match.
 5. The README component list and compatibility table are still true.
-6. `node scripts/validate.mjs` exits with 0 errors. Fix warnings unless you
-   have a reason to keep them.
+6. `pnpm validate` exits with 0 errors. Fix warnings unless you have a reason
+   to keep them.
 
 ## Checks
 
 ```bash
-# Validates JSON, manifests, versions, skills, agents, commands, hooks events,
-# referenced script paths and MCP config, and lists missing CLIs.
-node scripts/validate.mjs
+# Validates JSON, manifests, package.json, versions, skills, agents, commands,
+# hook events, referenced script paths and MCP config, and lists missing CLIs.
+pnpm validate
 ```
 
 When you add a check rule to `AGENTS.md`, add it to `scripts/validate.mjs` too.
@@ -317,8 +337,8 @@ claude --plugin-dir .
 
 ```bash
 # OpenCode: install into a scratch folder, inspect the output, then remove it
-node scripts/install-opencode.mjs --dest ./.tmp-opencode
-node scripts/install-opencode.mjs --dest ./.tmp-opencode --uninstall
+pnpm opencode:install --dest ./.tmp-opencode
+pnpm opencode:uninstall --dest ./.tmp-opencode
 ```
 {%- endif %}
 {%- if cookiecutter.target_codex == 'y' %}

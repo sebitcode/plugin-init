@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Validate this plugin for Claude Code, Codex and OpenCode.
-// Usage: node scripts/validate.mjs
+// Usage: pnpm validate
 // Exit code 1 when there are errors. Warnings do not fail the run.
 
 import { spawnSync } from "node:child_process";
@@ -127,6 +127,18 @@ if (codexManifest) {
   if (!has(".mcp.json") && codexManifest.mcpServers) err(`${p}: "mcpServers" is set but .mcp.json does not exist`);
 }
 
+// package.json (pnpm)
+const pkg = json("package.json");
+if (!pkg) err("package.json: missing; this project uses pnpm");
+else {
+  if (slug && pkg.name !== slug) err(`package.json: name "${pkg.name}" differs from "${slug}"`);
+  if (version && pkg.version !== version) err(`package.json: version "${pkg.version}" differs from "${version}"`);
+  if (!String(pkg.packageManager ?? "").startsWith("pnpm@")) err(`package.json: "packageManager" must be "pnpm@<version>"`);
+}
+for (const lock of ["package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "bun.lockb", "bun.lock"]) {
+  if (has(lock)) err(`${lock}: this project uses pnpm; delete it and run \`pnpm install\``);
+}
+
 // Marketplaces
 const claudeMarket = json(".claude-plugin/marketplace.json");
 if (claudeMarket) {
@@ -248,6 +260,7 @@ if (major < 18) err(`Node.js ${process.versions.node} is too old; use 18 or newe
 if (needsNode) info.push("hooks or MCP run `node`: users need Node.js 18+ on PATH");
 
 const clis = [
+  ["pnpm", true, "pnpm"],
   ["claude", targets.claude, "Claude Code"],
   ["codex", targets.codex, "Codex"],
   ["opencode", targets.opencode, "OpenCode"],
