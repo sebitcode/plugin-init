@@ -1,0 +1,31 @@
+{
+  "plugin_name": "My Claude Plugin",
+  "plugin_slug": "{{ cookiecutter.plugin_name.lower().strip().replace(' ', '-').replace('_', '-') }}",
+  "description": "A Claude Code plugin.",
+  "author_name": "Your Name",
+  "author_email": "",
+  "version": "0.1.0",
+  "license": ["MIT", "Apache-2.0", "Proprietary"],
+  "include_agent": ["y", "n"],
+  "include_skill": ["y", "n"],
+  "include_command": ["y", "n"],
+  "include_hooks": ["n", "y"],
+  "include_mcp": ["n", "y"],
+  "include_marketplace": ["y", "n"],
+  "__prompts__": {
+    "plugin_name": "Plugin name (human readable)",
+    "plugin_slug": "Plugin slug (kebab-case, used as plugin id)",
+    "description": "Short description",
+    "author_name": "Author name",
+    "author_email": "Author email (optional)",
+    "version": "Initial version",
+    "license": "License",
+    "include_agent": "Include an example subagent (agents/)?",
+    "include_skill": "Include an example skill (skills/)?",
+    "include_command": "Include an example slash command (commands/)?",
+    "include_hooks": "Include example hooks (hooks/hooks.json)?",
+    "include_mcp": "Include an example MCP server config (.mcp.json)?",
+    "include_marketplace": "Add marketplace.json so this repo can be installed directly?"
+  },
+  "_copy_without_render": []
+}

@@ -1,0 +1,11 @@
+{
+  "name": "{{ cookiecutter.plugin_slug }}",
+  "version": "{{ cookiecutter.version }}",
+  "description": "{{ cookiecutter.description }}",
+  "author": {
+    "name": "{{ cookiecutter.author_name }}"{% if cookiecutter.author_email %},
+    "email": "{{ cookiecutter.author_email }}"{% endif %}
+  },
+  "license": "{{ cookiecutter.license }}",
+  "keywords": []
+}

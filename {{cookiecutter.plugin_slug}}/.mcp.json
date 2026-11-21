@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "{{ cookiecutter.plugin_slug }}-server": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/server.js"],
+      "env": {}
+    }
+  }
+}

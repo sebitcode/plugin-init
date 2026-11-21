@@ -1,0 +1,14 @@
+{
+  "name": "{{ cookiecutter.plugin_slug }}-marketplace",
+  "owner": {
+    "name": "{{ cookiecutter.author_name }}"
+  },
+  "plugins": [
+    {
+      "name": "{{ cookiecutter.plugin_slug }}",
+      "source": "./",
+      "description": "{{ cookiecutter.description }}",
+      "version": "{{ cookiecutter.version }}"
+    }
+  ]
+}
